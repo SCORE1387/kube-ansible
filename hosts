@@ -1,6 +1,10 @@
 [master]
-master ansible_host=192.168.0.4
+master01 ansible_host=130.193.59.87
 
 [nodes]
-node01 ansible_host=192.168.0.6
-node02 ansible_host=192.168.0.7
+node01 ansible_host=130.193.59.88
+node02 ansible_host=130.193.59.83
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_user=ubuntu
