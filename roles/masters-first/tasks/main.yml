@@ -3,8 +3,13 @@
     path: /tmp/kubeadm-ha
     state: directory
 
+- name: Copy kubeadm-config.yaml
+  template:
+    src: kubeadm-config.yaml
+    dest: /tmp/kubeadm-ha/kubeadm-config.yaml
+
 - name: initialize the cluster
-  shell: kubeadm init --pod-network-cidr=10.244.0.0/16 >> cluster_initialized.txt
+  shell: kubeadm init --config=/tmp/kubeadm-ha/kubeadm-config.yaml >> cluster_initialized.txt
   args:
     chdir: $HOME
     creates: cluster_initialized.txt
@@ -30,13 +35,26 @@
     dest: "/tmp/kubeadm-ha/config"
     remote_src: yes
 
-- name: "Fetching {{item}} from master0"
+- name: "Fetching {{item}} from first master"
   fetch:
-    src: /etc/kubernetes/pki/{{item}}
-    dest: /tmp/pki/{{item}}
+    src: "{{item}}"
+    dest: "/tmp/{{item}}"
     flat: yes
   with_items:
-    - ca.crt
-    - ca.key
-    - sa.key
-    - sa.pub
+    - /etc/kubernetes/pki/ca.crt
+    - /etc/kubernetes/pki/ca.key
+    - /etc/kubernetes/pki/sa.key
+    - /etc/kubernetes/pki/sa.pub
+    - /etc/kubernetes/pki/front-proxy-ca.crt
+    - /etc/kubernetes/pki/front-proxy-ca.key
+    - /etc/kubernetes/pki/etcd/ca.crt
+    - /etc/kubernetes/pki/etcd/ca.key
+    - /etc/kubernetes/admin.conf
+
+- name: get join command
+  shell: kubeadm token create --print-join-command
+  register: join_command_raw
+
+- name: set join command
+  set_fact:
+    join_command: "{{ join_command_raw.stdout_lines[0] }}"

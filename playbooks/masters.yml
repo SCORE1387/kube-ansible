@@ -3,10 +3,10 @@
   roles:
     - masters-first
 
-#- hosts: masters[1:]
-#  become: yes
-#  roles:
-#    - masters-rest
+- hosts: masters[1:]
+  become: yes
+  roles:
+    - masters-rest
 
 - hosts: masters[0]
   become: yes

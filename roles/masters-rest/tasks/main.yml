@@ -1,42 +1,38 @@
-- name: Create /tmp/kubeadm-ha directory
+- name: ensure directories exist
   file:
-    path: /tmp/kubeadm-ha
+    path: /etc/kubernetes/pki/etcd
+    recurse: yes
     state: directory
 
-- name: initialize the cluster
-  shell: kubeadm init --pod-network-cidr=10.244.0.0/16 >> cluster_initialized.txt
-  args:
-    chdir: $HOME
-    creates: cluster_initialized.txt
-
-- name: create .kube directory
-  become: yes
-  become_user: ubuntu
-  file:
-    path: $HOME/.kube
-    state: directory
-    mode: 0755
-
-- name: copy admin.conf to user's kube config
+- name: copy files from first master - 1
   copy:
-    src: /etc/kubernetes/admin.conf
-    dest: /home/ubuntu/.kube/config
-    remote_src: yes
-    owner: ubuntu
-
-- name: Copy admin.conf to /tmp/kubeadm-ha/config
-  copy:
-    src: /etc/kubernetes/admin.conf
-    dest: "/tmp/kubeadm-ha/config"
-    remote_src: yes
-
-- name: "Fetching {{item}} from master0"
-  fetch:
-    src: /etc/kubernetes/pki/{{item}}
-    dest: /tmp/pki/{{item}}
-    flat: yes
+    src: /tmp/etc/kubernetes/pki/{{item}}
+    dest: /etc/kubernetes/pki/{{item}}
   with_items:
     - ca.crt
     - ca.key
     - sa.key
     - sa.pub
+    - front-proxy-ca.crt
+    - front-proxy-ca.key
+
+- name: copy files from first master - 2
+  copy:
+    src: /tmp/etc/kubernetes/pki/etcd/{{item}}
+    dest: /etc/kubernetes/pki/etcd/{{item}}
+  with_items:
+    - ca.crt
+    - ca.key
+
+- name: copy files from first master - 3
+  copy:
+    src: /tmp/etc/kubernetes/{{item}}
+    dest: /etc/kubernetes/{{item}}
+  with_items:
+    - admin.conf
+
+- name: join cluster
+  shell: "{{ hostvars[groups['masters'][0]].join_command }} --experimental-control-plane >> node_joined.txt"
+  args:
+    chdir: $HOME
+    creates: node_joined.txt
