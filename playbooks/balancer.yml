@@ -1,0 +1,4 @@
+- hosts: balancers
+  become: yes
+  roles:
+    - haproxy

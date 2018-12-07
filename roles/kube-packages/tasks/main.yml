@@ -17,10 +17,10 @@
 - name: install kubelet and kubeadm
   apt:
     name: [kubelet, kubeadm]
-    state: present
+    state: latest
 
 - name: install kubectl
   apt:
     name: kubectl
-    state: present
+    state: latest
   when: inventory_hostname in groups["masters"]

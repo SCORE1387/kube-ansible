@@ -1,0 +1,58 @@
+#jinja2:trim_blocks:False
+global
+  log 127.0.0.1 local0
+  maxconn 4096
+
+defaults
+  log	global
+  mode	http
+  option	httplog
+  option	dontlognull
+  timeout connect 5s
+  timeout client 50s
+  timeout client-fin 50s
+  timeout server 50s
+  timeout tunnel 1h
+
+listen stats
+ bind *:9999
+ stats enable
+ stats hide-version
+ stats uri /stats
+
+#############################
+#  api-proxy config
+#############################
+
+frontend front-api-proxy
+ bind *:6443
+ mode tcp
+ option tcplog
+ default_backend back-api-proxy
+
+backend back-api-proxy
+ mode tcp
+ option tcplog
+ balance roundrobin
+ {% for item in groups['masters'] %}
+ server {{ item }} {{hostvars[item]["ansible_host"]}}:6443 check
+ {% endfor %}
+
+#############################
+#  etcd config
+#############################
+
+
+frontend front-etcd-proxy
+ bind *:2379
+ mode tcp
+ option tcplog
+ default_backend back-etcd-proxy
+
+backend back-etcd-proxy
+ mode tcp
+ option tcplog
+ balance roundrobin
+ {% for item in groups['masters'] %}
+ server {{ item }} {{hostvars[item]["ansible_host"]}}:2379 check
+ {% endfor %}

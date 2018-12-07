@@ -1,8 +1,8 @@
-#[balancer]
-#balancer01 ansible_host=130.193.57.99
+[balancers]
+balancer ansible_host=130.193.35.32
 
 [masters]
-master01 ansible_host=130.193.57.99
+master01 ansible_host=130.193.35.29
 #master02 ansible_host=130.193.52.111
 #master03 ansible_host=130.193.57.99
 
@@ -10,6 +10,10 @@ master01 ansible_host=130.193.57.99
 #node01 ansible_host=130.193.59.88
 #node02 ansible_host=130.193.59.83
 #node03 ansible_host=130.193.59.83
+
+[kube:children]
+masters
+nodes
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
