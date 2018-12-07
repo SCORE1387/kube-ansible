@@ -1,0 +1,19 @@
+- name: Install ntpd
+  apt:
+    name: ntp
+    state: present
+    update_cache: true
+
+- name: stop ntpd service
+  service:
+    name: ntp
+    state: stopped
+
+- name: sync time
+  command: ntpd -gq
+
+- name: start ntpd service
+  service:
+    name: ntp
+    state: restarted
+    enabled: yes

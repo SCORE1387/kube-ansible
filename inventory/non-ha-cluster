@@ -1,4 +1,4 @@
-[master]
+[masters]
 master01 ansible_host=130.193.59.87
 
 [nodes]

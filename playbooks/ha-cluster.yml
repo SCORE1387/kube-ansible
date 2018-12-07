@@ -1,4 +1,4 @@
+- import_playbook: ntpd.yml
 - import_playbook: docker.yml
 - import_playbook: kube-packages.yml
 - import_playbook: masters.yml
-- import_playbook: nodes.yml

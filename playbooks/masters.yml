@@ -1,0 +1,7 @@
+- hosts: masters
+  become: yes
+  roles:
+    - { role: masters-first, when: "groups['masters'][0] == inventory_hostname"}
+    - { role: flannel, when: "groups['masters'][0] == inventory_hostname"}
+    - { role: dashboard, when: "groups['masters'][0] == inventory_hostname"}
+

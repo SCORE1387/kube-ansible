@@ -1,0 +1,42 @@
+- name: Create /tmp/kubeadm-ha directory
+  file:
+    path: /tmp/kubeadm-ha
+    state: directory
+
+- name: initialize the cluster
+  shell: kubeadm init --pod-network-cidr=10.244.0.0/16 >> cluster_initialized.txt
+  args:
+    chdir: $HOME
+    creates: cluster_initialized.txt
+
+- name: create .kube directory
+  become: yes
+  become_user: ubuntu
+  file:
+    path: $HOME/.kube
+    state: directory
+    mode: 0755
+
+- name: copy admin.conf to user's kube config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/ubuntu/.kube/config
+    remote_src: yes
+    owner: ubuntu
+
+- name: Copy admin.conf to /tmp/kubeadm-ha/config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "/tmp/kubeadm-ha/config"
+    remote_src: yes
+
+- name: "Fetching {{item}} from master0"
+  fetch:
+    src: /etc/kubernetes/pki/{{item}}
+    dest: /tmp/pki/{{item}}
+    flat: yes
+  with_items:
+    - ca.crt
+    - ca.key
+    - sa.key
+    - sa.pub
