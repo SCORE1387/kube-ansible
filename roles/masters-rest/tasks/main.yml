@@ -32,7 +32,7 @@
     - admin.conf
 
 - name: join cluster
-  shell: "{{ hostvars[groups['masters'][0]].join_command }} --experimental-control-plane >> node_joined.txt"
+  shell: "{{ hostvars[groups['masters'][0]].join_command }} --experimental-control-plane >> master_joined.txt"
   args:
     chdir: $HOME
-    creates: node_joined.txt
+    creates: master_joined.txt
